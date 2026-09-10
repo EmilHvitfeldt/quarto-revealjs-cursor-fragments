@@ -5,7 +5,7 @@ Cursor-driven RevealJS fragment animations for Quarto. Mark a fragment with a cl
 ## Install
 
 ```bash
-quarto add EmilHvitfeldt/quarto-slidefx
+quarto add EmilHvitfeldt/quarto-revealjs-cursor-fragments
 ```
 
 Then in a revealjs document's YAML:
