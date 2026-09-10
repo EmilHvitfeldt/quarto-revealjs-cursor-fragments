@@ -1,0 +1,515 @@
+/*-- drag-in fragments --*/
+
+/* Must not clip content while it is still off-slide. Do NOT set
+   `position: relative` here: Reveal positions sections absolutely, and
+   overriding that drops them back into normal flow, so every later slide
+   renders in the wrong place. Reveal's own positioning already makes the
+   section a containing block for the cursors. */
+.reveal .slides section:has(.drag-in) {
+  overflow: visible;
+}
+
+/* Reveal's default fragment transition is `all`, which fights anime.js over
+   the transform. Restrict it to opacity and let anime own the movement. */
+.reveal .slides section .drag-in {
+  transition: opacity 0.15s ease;
+  will-change: transform;
+}
+
+/* `transform` does not apply to non-replaced inline elements, so an inline
+   span marked .drag-in would never move. */
+.reveal .slides section span.drag-in {
+  display: inline-block;
+}
+
+/* Held on screen by JS for the length of the drag-out, after Reveal has
+   already removed the `visible` class. */
+.reveal .slides section .drag-leaving {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/*-- type-in fragments --*/
+
+.reveal .slides section :is(.type-caret) {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: type-caret-blink 1s steps(1) infinite;
+}
+
+@keyframes type-caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/*-- emoji burst --*/
+
+/* `.center` sections shrink-wrap to content height, and Reveal centers them
+   vertically by measuring that (shrink-wrapped) box's scrollHeight. Any
+   descendant whose *layout* box (via width/height/top/left) sticks out past
+   the section inflates that scrollHeight and throws off Reveal's own
+   centering math — this is true even with `position: fixed`, since what
+   counts an element toward an ancestor's scrollable overflow is DOM
+   containment, not which box its `top`/`left` resolve against.
+   `transform`, unlike `top`/`left`, is purely a paint-time effect and never
+   contributes to scrollHeight, so `.emoji-burst` keeps a zero-footprint box
+   (matching the section exactly) and every emoji is pushed out to its
+   actual on-slide position with a `translate()` instead. Offsets are in the
+   deck's real 1280x720 stage pixels (see the revealjs `width`/`height` in
+   the front matter): CSS transforms compose down the tree in the same
+   coordinate space regardless of the responsive scale Reveal applies to
+   `.slides`, so a px offset here lands in the same place at any window
+   size. */
+.emoji-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.emoji-pop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-block;
+  font-size: 0.5em;
+  opacity: 0;
+  animation: emoji-zoom 2.8s ease-in-out infinite;
+}
+
+@keyframes emoji-zoom {
+  0%   { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) translateY(0)    scale(0);   opacity: 0; }
+  15%  { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) translateY(-6px) scale(1.3); opacity: 1; }
+  30%  { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) translateY(6px)  scale(1);   opacity: 1; }
+  55%  { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) translateY(-6px) scale(1);   opacity: 1; }
+  75%  { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) translateY(6px)  scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) translateY(0)    scale(0);   opacity: 0; }
+}
+
+/*-- find-replace fragments --*/
+
+.fr-bar {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  /* Below .collab-cursor-node (900) so the cursor stays visible while it is
+     clicking things in the bar. */
+  z-index: 860;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: #2d2d2d;
+  border: 1px solid #3f3f3f;
+  border-radius: 8px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  pointer-events: none;
+}
+
+.fr-bar--bottom {
+  top: auto;
+  bottom: 26px;
+}
+
+.fr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fr-label {
+  width: 58px;
+  font-size: 12px;
+  color: #9a9a9a;
+  text-align: right;
+}
+
+.fr-field {
+  display: inline-block;
+  min-width: 170px;
+  padding: 4px 8px;
+  background: #1e1e1e;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  font: 13px/1.5 'Consolas', 'Monaco', 'Courier New', monospace;
+  color: #e6e6e6;
+  white-space: pre;
+}
+
+.fr-count {
+  min-width: 78px;
+  font-size: 11px;
+  color: #9a9a9a;
+}
+
+.fr-count--done { color: #56c886; }
+
+.fr-btn {
+  padding: 4px 10px;
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ddd;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.fr-btn--pressed {
+  background: #4285f4;
+  border-color: #4285f4;
+  color: #fff;
+}
+
+/* Match highlights. The background is animated by JS, so only the shape and
+   transition-free behavior belong here. */
+.fr-hit {
+  border-radius: 3px;
+  padding: 0 1px;
+  transition: none;
+}
+
+/*-- SlideFx fragment styles --*/
+
+/* anime.js owns the transform and opacity of anything it animates. Reveal's
+   default fragment transition is `all`, which fights it. */
+.reveal .slides section :is(
+  .retype, .nudge, .paste-in, .approve, .cursor-idle,
+  .race-in, .resize-in, .crop-in, .rotate-handle, .marquee-select, .reorder,
+  .duplicate, .diff-in, .undo, .comment, .argue, .drag-from-folder
+) {
+  transition: none;
+  will-change: transform;
+}
+
+/* Same reason as .drag-in: transform does not apply to non-replaced inline
+   elements, so a marked span would never move. */
+.reveal .slides section span:is(
+  .retype, .nudge, .paste-in, .diff-in, .undo, .argue
+) {
+  display: inline-block;
+}
+
+/* Slides hosting these need to not clip cursors and chrome. Never set
+   `position: relative` here; Reveal positions sections absolutely and
+   overriding it drops every later slide out of place. */
+.reveal .slides section:has(.fx-anchor),
+.reveal .slides section:has(.race-in),
+.reveal .slides section:has(.drag-from-folder) {
+  overflow: visible;
+}
+
+/* Selection highlights */
+
+.fx-hit {
+  border-radius: 3px;
+  padding: 0 1px;
+  transition: none;
+}
+
+.fx-selected {
+  outline: 2px solid rgba(66, 133, 244, 0.8);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Marquee */
+
+.fx-marquee {
+  position: absolute;
+  z-index: 700;
+  pointer-events: none;
+  border: 1.5px dashed rgba(66, 133, 244, 0.95);
+  background: rgba(66, 133, 244, 0.12);
+  border-radius: 2px;
+}
+
+/* Resize and crop chrome */
+
+.fx-handles {
+  position: absolute;
+  z-index: 880;
+  pointer-events: none;
+  outline: 1.5px solid rgba(66, 133, 244, 0.9);
+}
+
+.fx-handles::before, .fx-handles::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #fff;
+  border: 1.5px solid #4285f4;
+  border-radius: 1px;
+}
+.fx-handles::before { right: -5px; bottom: -5px; }
+.fx-handles::after  { left: -5px; top: -5px; }
+
+.fx-crop-frame {
+  position: absolute;
+  z-index: 880;
+  pointer-events: none;
+  border: 1.5px dashed rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.45);
+}
+
+.fx-knob {
+  position: absolute;
+  z-index: 880;
+  pointer-events: none;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 2px solid #4285f4;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Badges: keyboard shortcuts, reactions, angle readouts */
+
+.fx-badge {
+  position: absolute;
+  z-index: 880;
+  pointer-events: none;
+  padding: 4px 9px;
+  background: #222;
+  color: #fff;
+  border-radius: 5px;
+  font: 600 14px/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+.fx-badge--approve {
+  background: #2e7d32;
+  font-size: 16px;
+}
+
+.fx-badge--angle {
+  background: #4285f4;
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+/* Comment bubble */
+
+.fx-comment {
+  position: absolute;
+  z-index: 880;
+  pointer-events: none;
+  transform-origin: left center;
+  max-width: 270px;
+  padding: 9px 12px;
+  background: #fffbe6;
+  border: 1px solid #e8dca0;
+  border-radius: 3px 8px 8px 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #3a3a3a;
+}
+
+.fx-comment-author {
+  display: block;
+  font-weight: 700;
+  font-size: 11px;
+  color: #8a7a2a;
+  margin-bottom: 2px;
+}
+
+/* Duplicated clones */
+
+.fx-clone {
+  position: absolute;
+  z-index: 600;
+  pointer-events: none;
+}
+
+/* Diff */
+
+.fx-del {
+  color: #c62828;
+  background: rgba(198, 40, 40, 0.12);
+  text-decoration: line-through;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.fx-ins {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.14);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.fx-ins--settled {
+  color: inherit;
+  background: none;
+  padding: 0;
+}
+
+/* Folder window and drag ghost */
+
+.fx-folder {
+  position: absolute;
+  z-index: 870;
+  pointer-events: none;
+  width: 330px;
+  background: #f3f3f3;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.fx-folder-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  background: #e4e4e4;
+  border-bottom: 1px solid #d2d2d2;
+}
+
+.fx-folder-bar .fx-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.fx-folder-bar .fx-dot:nth-child(1) { background: #ff5f56; }
+.fx-folder-bar .fx-dot:nth-child(2) { background: #ffbd2e; }
+.fx-folder-bar .fx-dot:nth-child(3) { background: #27c93f; }
+
+.fx-folder-title {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.fx-folder-body {
+  display: flex;
+  gap: 12px;
+  padding: 14px 12px;
+}
+
+.fx-folder-item {
+  width: 92px;
+  text-align: center;
+}
+
+.fx-folder-item--pick .fx-folder-thumb {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.35);
+}
+
+.fx-folder-thumb {
+  height: 62px;
+  background: #fff center/cover no-repeat;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+}
+
+.fx-folder-name {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fx-ghost {
+  position: absolute;
+  z-index: 890;
+  pointer-events: none;
+  background: #fff center/cover no-repeat;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 5px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3);
+}
+
+
+/*-- pros & cons columns --*/
+
+.proscons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+  margin-top: 0.4em;
+}
+
+.proscons-card {
+  font-size: 50px;
+
+  p:has(.proscons-title) {
+    margin: 0 0 0.5em;
+  }
+
+  .proscons-title {
+    display: block;
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    padding-left: 1.5em;
+    margin-bottom: 0.35em;
+    line-height: 1.35;
+  }
+
+  li::before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 700;
+  }
+
+  li:has(> .fragment.type-in:not(.visible))::before {
+    opacity: 0;
+  }
+}
+
+.proscons-card--pro {
+  .proscons-title { color: #1f8a32; }
+  li::before {
+    content: "+";
+    color: #1f8a32;
+  }
+}
+
+.proscons-card--con {
+  .proscons-title { color: #c23b33; }
+  li::before {
+    content: "\2212";
+    color: #c23b33;
+  }
+}
+
+/*-- .move-item ghost --*/
+
+.fx-move-ghost {
+  position: absolute;
+  z-index: 890;
+  pointer-events: none;
+  box-sizing: border-box;
+  padding: 4px 12px;
+  line-height: 1.35;
+}
+

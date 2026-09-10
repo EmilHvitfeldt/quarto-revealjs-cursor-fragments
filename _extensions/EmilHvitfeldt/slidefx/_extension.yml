@@ -1,0 +1,12 @@
+title: SlideFx
+author: Emil Hvitfeldt
+version: 0.1.0
+quarto-required: ">=1.4.0"
+contributes:
+  revealjs-plugins:
+    - name: SlideFx
+      script:
+        - path: anime.min.js
+        - path: slidefx.js
+        - path: styles.js
+      stylesheet: slidefx.css

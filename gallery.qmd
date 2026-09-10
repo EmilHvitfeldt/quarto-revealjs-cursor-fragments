@@ -1,0 +1,202 @@
+---
+title: SlideFx gallery
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    revealjs-plugins:
+      - slidefx
+pagetitle: SlideFx gallery
+echo: false
+code-line-numbers: false
+---
+
+## retype
+
+::: {#retype-target}
+The plot shows a strong correlation between the two variables.
+:::
+
+::: {.fragment .retype for="#retype-target" word="strong" to="weak" cursor="Hailey"}
+:::
+
+## nudge
+
+::: {#nudge-target}
+Fussed over, twice.
+:::
+
+::: {.fragment .nudge for="#nudge-target" by="26,0" cursor="Kari"}
+:::
+
+## paste-in
+
+::: {.fragment .paste-in badge="⌘V"}
+Pasted straight in.
+:::
+
+## approve
+
+::: {#approve-target}
+Someone else's work.
+:::
+
+::: {.fragment .approve for="#approve-target" mark="✓" cursor="John"}
+:::
+
+## cursor-idle
+
+The slide feels inhabited.
+
+::: {.fragment .cursor-idle cursors="Kari,John,Hailey,Dave"}
+:::
+
+## race-in
+
+::: {.fragment .race-in cursors="Kari,John,Hailey,Dave"}
+- first point
+- second point
+- third point
+- fourth point
+:::
+
+## resize-in
+
+::: {.fragment .resize-in from-width="180" cursor="Kari"}
+![](lizard.gif){width="360"}
+:::
+
+## crop-in
+
+::: {.fragment .crop-in inset="0 26 0 0" cursor="John"}
+![](lizard.gif){width="360"}
+:::
+
+## rotate-handle
+
+::: {.fragment .rotate-handle angle="-8" cursor="Hailey"}
+![](lizard.gif){width="260"}
+:::
+
+## marquee-select
+
+::: {.fragment .marquee-select by="80,0" cursor="Kari"}
+- alpha
+- beta
+- gamma
+:::
+
+## delete-items
+
+::: {#delete-target}
+- keep the first one
+- but not this
+- nor this
+- and definitely not this
+:::
+
+::: {.fragment .delete-items for="#delete-target" keep="1" cursor="John"}
+:::
+
+## add-item
+
+::: {#add-target}
+- first
+- second
+:::
+
+::: {.fragment .add-item for="#add-target" text="third, typed on arrival" cursor="Kari"}
+:::
+
+## reorder
+
+::: {.fragment .reorder item="3" to="1" cursor="John"}
+- first
+- second
+- third, which belongs at the top
+:::
+
+## duplicate
+
+::: {.fragment .duplicate times="3" gap="18" cursor="Hailey"}
+![](lizard.gif){width="220"}
+:::
+
+## diff-in
+
+::: {.fragment .diff-in was="twelve observations"}
+forty observations
+:::
+
+## undo
+
+::: {#undo-target}
+Moved, then unmoved.
+:::
+
+::: {.fragment .undo for="#undo-target" by="110,30" cursor="Kari"}
+:::
+
+## comment
+
+::: {#comment-target}
+A claim worth questioning.
+:::
+
+::: {.fragment .comment for="#comment-target" cursor="Hailey" text="Is this the right framing?"}
+:::
+
+## comment, anonymous
+
+::: {#comment-anon-target}
+No byline needed.
+:::
+
+::: {.fragment .comment for="#comment-anon-target" text="Is this the right framing?"}
+:::
+
+## argue
+
+::: {#argue-target}
+Contested.
+:::
+
+::: {.fragment .argue for="#argue-target" cursors="Kari,John" winner="right" amp="60"}
+:::
+
+## argue, anonymous
+
+::: {#argue-anon-target}
+Contested by nobody in particular.
+:::
+
+::: {.fragment .argue for="#argue-anon-target" winner="right" amp="60"}
+:::
+
+## drag-from-folder
+
+::: {.fragment .drag-from-folder files="plot.png,lizard.gif,logo.svg" pick="2" folder="images"}
+![](lizard.gif){width="300"}
+:::
+
+## move-item
+
+::: proscons
+::: {#move-pros .proscons-card .proscons-card--pro}
+[Pros]{.proscons-title}
+
+- fast
+- intuitive
+:::
+
+::: {#move-cons .proscons-card .proscons-card--con}
+[Cons]{.proscons-title}
+
+- fragile
+- requires regex
+- so many bugs
+:::
+:::
+
+::: {.fragment .move-item for="#move-cons" to="#move-pros" item="2" cursor="Kari"}
+:::
