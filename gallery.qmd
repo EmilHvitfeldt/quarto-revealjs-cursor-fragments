@@ -6,120 +6,46 @@ format:
     height: 720
     revealjs-plugins:
       - cursor-fragments
+    auto-stretch: false
 pagetitle: Cursor Fragments gallery
 echo: false
 code-line-numbers: false
+slide-level: 2
 ---
+
+# Text edits
 
 ## retype
 
-::: {.fragment .retype word="strong" to="weak" cursor="Hailey"}
-The plot shows a strong correlation between the two variables.
-:::
+The plot shows a [strong]{.fragment .retype to="weak" cursor="Carl"} correlation between the two variables.
 
 ## nudge
 
-::: {.fragment .nudge by="26,0" cursor="Kari"}
+::: {.fragment .nudge by="26,0" cursor="Dave"}
 Fussed over, twice.
-:::
-
-## paste-in
-
-::: {.fragment .paste-in badge="⌘V"}
-Pasted straight in.
 :::
 
 ## approve
 
-Someone else's [work.]{.fragment .approve mark="✓" cursor="John"}
-
-## cursor-idle
-
-The slide feels inhabited.
-
-::: {.fragment .cursor-idle cursors="Kari,John,Hailey,Dave"}
-:::
-
-## race-in
-
-::: {.fragment .race-in cursors="Kari,John,Hailey,Dave"}
-- first point
-- second point
-- third point
-- fourth point
-:::
-
-## resize-in
-
-::: {.fragment .resize-in from-width="180" cursor="Kari"}
-![](lizard.gif){width="360"}
-:::
-
-## crop-in
-
-::: {.fragment .crop-in inset="0 26 0 0" cursor="John"}
-![](lizard.gif){width="360"}
-:::
-
-## rotate-handle
-
-::: {.fragment .rotate-handle angle="-8" cursor="Hailey"}
-![](lizard.gif){width="260"}
-:::
-
-## marquee-select
-
-::: {.fragment .marquee-select by="80,0" cursor="Kari"}
-- alpha
-- beta
-- gamma
-:::
-
-## delete-items
-
-::: {.fragment .delete-items keep="1" cursor="John"}
-- keep the first one
-- but not this
-- nor this
-- and definitely not this
-:::
-
-## add-item
-
-::: {.fragment .add-item text="third, typed on arrival" cursor="Kari"}
-- first
-- second
-:::
-
-## reorder
-
-::: {.fragment .reorder item="3" to="1" cursor="John"}
-- first
-- second
-- third, which belongs at the top
-:::
-
-## duplicate
-
-::: {.fragment .duplicate times="3" gap="18" cursor="Hailey"}
-![](lizard.gif){width="220"}
-:::
+Someone else's [work.]{.fragment .approve mark="✓" cursor="Amanda"}
 
 ## diff-in
 
-::: {.fragment .diff-in was="twelve observations"}
-forty observations
+::: {.fragment .diff-in to="forty observations"}
+twelve observations
 :::
 
 ## undo
 
-::: {.fragment .undo by="110,30" cursor="Kari"}
+::: {.fragment .undo by="110,30" cursor="Dave"}
 Moved, then unmoved.
 :::
 
+# Annotation
+
 ## comment
 
-::: {.fragment .comment cursor="Hailey" text="Is this the right framing?"}
+::: {.fragment .comment cursor="Carl" text="Is this the right framing?"}
 A claim worth questioning.
 :::
 
@@ -131,20 +57,53 @@ No byline needed.
 
 ## argue
 
-::: {.fragment .argue cursors="Kari,John" winner="right" amp="60"}
-Contested.
-:::
+[Contested.]{.fragment .argue cursors="Dave,Amanda" winner="right" amp="60"}
 
 ## argue, anonymous
 
-::: {.fragment .argue winner="right" amp="60"}
-Contested by nobody in particular.
+[Contested by nobody in particular.]{.fragment .argue winner="right" amp="60"}
+
+# Lists
+
+## race-in
+
+::: {.fragment .race-in cursors="Dave,Amanda,Carl,Dave"}
+- first point
+- second point
+- third point
+- fourth point
 :::
 
-## drag-from-folder
+## marquee-select
 
-::: {.fragment .drag-from-folder files="plot.png,lizard.gif,logo.svg" pick="2" folder="images"}
-![](lizard.gif){width="300"}
+::: {.fragment .marquee-select by="80,0" cursor="Dave"}
+- alpha
+- beta
+- gamma
+:::
+
+## delete-items
+
+::: {.fragment .delete-items keep="1" cursor="Amanda"}
+- keep the first one
+- but not this
+- nor this
+- and definitely not this
+:::
+
+## add-item
+
+::: {.fragment .add-item text="third, typed on arrival" cursor="Dave"}
+- first
+- second
+:::
+
+## reorder
+
+::: {.fragment .reorder item="3" to="1" cursor="Amanda"}
+- first
+- second
+- third, which belongs at the top
 :::
 
 ## move-item
@@ -166,5 +125,40 @@ Contested by nobody in particular.
 :::
 :::
 
-::: {.fragment .move-item for="#move-cons" to="#move-pros" item="2" cursor="Kari"}
+::: {.fragment .move-item for="#move-cons" to="#move-pros" item="2" cursor="Dave"}
+:::
+
+# Images
+
+## paste-in
+
+![](lizard.gif){width="300" .fragment .paste-in badge="⌘V"}
+
+## resize
+
+![](lizard.gif){width="360" .fragment .resize from-width="180" cursor="Dave"}
+
+## crop
+
+![](lizard.gif){width="360" .fragment .crop inset="0 26 0 0" cursor="Amanda"}
+
+## rotate-handle
+
+![](lizard.gif){width="260" .fragment .rotate-handle angle="-8" cursor="Carl"}
+
+## duplicate
+
+![](lizard.gif){width="220" .fragment .duplicate times="3" gap="18" cursor="Carl"}
+
+## drag-from-folder
+
+![](lizard.gif){width="300" .fragment .drag-from-folder files="plot.png,lizard.gif,logo.svg" pick="2" folder="images"}
+
+# Ambient
+
+## cursor-idle
+
+The slide feels inhabited.
+
+::: {.fragment .cursor-idle cursors="Dave,Amanda,Carl,Dave"}
 :::

@@ -237,6 +237,33 @@ window.CursorFragments = (function () {
     restore(el);
   }
 
+  // Default reversal for styles that define only `show`: replay the same
+  // timeline backward rather than snapping straight to the restored markup.
+  // anime.js timelines are themselves anime instances, so `.reverse()` flips
+  // playback direction on whatever is left of the forward run (whole or
+  // mid-flight) and `.finished` resolves once it has played back to the
+  // start — only then is it safe to hand the element back to `restore`,
+  // which cleans up the wrapper spans/markup a live reverse can't undo.
+  function reverseThenTeardown(el) {
+    const tl = el._fxTl;
+    if (!tl || typeof tl.reverse !== 'function') { teardown(el); return; }
+    el.classList.add('fx-leaving');
+    const done = () => { el.classList.remove('fx-leaving'); teardown(el); };
+    // reverse() flips the playback direction (and, on a finished timeline,
+    // un-sets `completed` as a side effect); play() then resumes the real
+    // rAF-driven engine, which correctly ticks currentTime back down from
+    // wherever it is — no manual reset/seek needed. A manual tl.reset() was
+    // tried here previously to "unstick" a supposedly-pinned currentTime,
+    // but that was based on a wrong assumption: it forces every child to a
+    // synchronous pristine-start render first (a real anime.js quirk, since
+    // each child re-derives its own reversed flag from its own untouched
+    // `direction` on reset), which is what caused a visible snap-then-play.
+    tl.reverse();
+    tl.play();
+    if (tl.finished && typeof tl.finished.then === 'function') tl.finished.then(done);
+    else setTimeout(done, tl.duration || 0);
+  }
+
   // ── Cursor helpers shared by several styles ───────────────────────────────
 
   // Fly a cursor in from an edge to a point, and return the entry point so the
@@ -292,18 +319,19 @@ window.CursorFragments = (function () {
 
     const ms = Math.max(text.length * (speed || 55), 120);
     const state = { n: 0 };
-    let done = false;
 
     tl.add({
       targets: state, n: text.length, duration: ms, easing: 'linear',
       begin: () => {
-        done = false;
-        host.textContent = '';
+        // Reversed playback starts from the "fully typed" end state.
+        host.textContent = tl.reversed ? text : '';
         host.appendChild(caret);
       },
       update: () => {
-        if (done) return;         // anime can tick update once more after complete
-        host.textContent = text.slice(0, Math.round(state.n));
+        // Clamp: anime can call update with n slightly outside [0, text.length]
+        // on the tick immediately before/after complete, in either direction.
+        const n = Math.min(text.length, Math.max(0, Math.round(state.n)));
+        host.textContent = text.slice(0, n);
         host.appendChild(caret);
         if (cursor) {
           const c = posIn(caret, section);
@@ -311,10 +339,14 @@ window.CursorFragments = (function () {
         }
       },
       complete: () => {
-        done = true;
-        host.textContent = text;
-        if (keepCaret) host.appendChild(caret);
-        else caret.remove();      // no-op when already detached
+        if (tl.reversed) {
+          host.textContent = '';
+          caret.remove();
+        } else {
+          host.textContent = text;
+          if (keepCaret) host.appendChild(caret);
+          else caret.remove();    // no-op when already detached
+        }
       },
     }, offset);
     return ms;
@@ -327,21 +359,27 @@ window.CursorFragments = (function () {
     caret.className = 'type-caret';
     const ms = Math.max(text.length * (speed || 40), 120);
     const state = { n: text.length };
-    let done = false;
 
     tl.add({
       targets: state, n: 0, duration: ms, easing: 'linear',
-      begin: () => { done = false; host.textContent = text; host.appendChild(caret); },
+      begin: () => {
+        // Reversed playback starts from the "fully deleted" end state.
+        host.textContent = tl.reversed ? '' : text;
+        host.appendChild(caret);
+      },
       update: () => {
-        if (done) return;
-        host.textContent = text.slice(0, Math.round(state.n));
+        const n = Math.min(text.length, Math.max(0, Math.round(state.n)));
+        host.textContent = text.slice(0, n);
         host.appendChild(caret);
         if (cursor) {
           const c = posIn(caret, section);
           anime.set(cursor, { translateX: c.x, translateY: c.y + c.h * 0.55 });
         }
       },
-      complete: () => { done = true; host.textContent = ''; caret.remove(); },
+      complete: () => {
+        host.textContent = tl.reversed ? text : '';
+        caret.remove();
+      },
     }, offset);
     return ms;
   }
@@ -476,7 +514,7 @@ window.CursorFragments = (function () {
           release(ctx.el, marker);
           if (spec.hide) spec.hide(ctx);
           else if (heldByOthers(ctx.el, marker)) sweep(ctx.el);
-          else teardown(ctx.el);
+          else reverseThenTeardown(ctx.el);
         }
       });
     });

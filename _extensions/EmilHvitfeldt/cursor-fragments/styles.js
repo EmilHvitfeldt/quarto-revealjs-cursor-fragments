@@ -54,44 +54,80 @@
   // One wrong word, selected, deleted and retyped. The most direct
   // demonstration of editing a rendered slide.
 
+  // Selects `from`, deletes it and types `into`, on `host`. Used both to run
+  // the fragment forward (word -> to) and, in `hide`, to run it in reverse
+  // (to -> word) as a genuine second animation rather than an anime.js
+  // timeline `.reverse()` — which does not correctly invert a hand-rolled
+  // counter-driven tween like `typeInto`/`deleteFrom` (their target value is
+  // cached once at build time, so replaying the same timeline "backward"
+  // just reruns the same forward counter instead of counting down).
+  function runRetype(ctx, host, from, into, speed, done) {
+    const hc = S.posIn(host, ctx.section);
+    const cursor = ctx.cursor();
+
+    const tl = ctx.tl();
+    const at = { x: hc.x + hc.w * 0.5, y: hc.y + hc.h * 0.6 };
+    const entry = S.flyIn(tl, cursor, ctx.from(), at, 0);
+
+    // select the current word
+    anime.set(host, { backgroundColor: 'rgba(66,133,244,0)' });
+    tl.add({ targets: host, backgroundColor: 'rgba(66,133,244,0.35)',
+             duration: 240, easing: 'easeOutQuad' }, 580);
+
+    // delete it, drop the selection, type the replacement
+    let t = 900;
+    t += S.deleteFrom(tl, {
+      section: ctx.section, host, text: from, cursor,
+      offset: t, speed,
+    });
+
+    tl.add({ targets: host, backgroundColor: 'rgba(66,133,244,0)',
+             duration: 160, easing: 'linear' }, t);
+    t += 100;
+
+    t += S.typeInto(tl, {
+      section: ctx.section, host, text: into, cursor,
+      offset: t, speed: speed + 13,
+    });
+
+    S.flyOut(tl, cursor, entry, t + 240);
+
+    if (done) {
+      if (tl.finished && typeof tl.finished.then === 'function') tl.finished.then(done);
+      else setTimeout(done, t + 240);
+    }
+  }
+
   S.define('retype', {
     show(ctx) {
-      const word = ctx.attr('word');
       const to = ctx.attr('to');
-      if (!word || to == null) return;
+      if (to == null) return;
 
-      const hits = S.wrapMatches(ctx.el, word, 'fx-hit');
-      if (!hits.length) return;
-      const host = hits[0];
-      const hc = S.posIn(host, ctx.section);
-      const cursor = ctx.cursor();
-
-      const tl = ctx.tl();
-      const at = { x: hc.x + hc.w * 0.5, y: hc.y + hc.h * 0.6 };
-      const entry = S.flyIn(tl, cursor, ctx.from(), at, 0);
-
-      // select the wrong word
-      anime.set(host, { backgroundColor: 'rgba(66,133,244,0)' });
-      tl.add({ targets: host, backgroundColor: 'rgba(66,133,244,0.35)',
-               duration: 240, easing: 'easeOutQuad' }, 580);
-
-      // delete it, drop the selection, type the replacement
-      let t = 900;
-      t += S.deleteFrom(tl, {
-        section: ctx.section, host, text: word, cursor,
-        offset: t, speed: ctx.num('speed', 42),
-      });
-
-      tl.add({ targets: host, backgroundColor: 'rgba(66,133,244,0)',
-               duration: 160, easing: 'linear' }, t);
-      t += 100;
-
-      t += S.typeInto(tl, {
-        section: ctx.section, host, text: to, cursor,
-        offset: t, speed: ctx.num('speed', 55),
-      });
-
-      S.flyOut(tl, cursor, entry, t + 240);
+      // With `word`, find that text inside ctx.el and wrap it. Without it,
+      // ctx.el is expected to already be the word itself (e.g. an inline
+      // [strong]{.fragment .retype to="weak"} span) — animate it directly.
+      const word = ctx.attr('word');
+      let host;
+      if (word) {
+        const hits = S.wrapMatches(ctx.el, word, 'fx-hit');
+        if (!hits.length) return;
+        host = hits[0];
+      } else {
+        host = ctx.el;
+      }
+      const text = word || host.textContent;
+      host.dataset.fxWord = text;
+      host.dataset.fxTo = to;
+      runRetype(ctx, host, text, to, ctx.num('speed', 42));
+    },
+    hide(ctx) {
+      const host = ctx.el.classList.contains('fx-hit')
+        ? ctx.el
+        : ctx.el.querySelector('.fx-hit') || ctx.el;
+      const from = host.dataset.fxTo;
+      const into = host.dataset.fxWord;
+      if (from == null || into == null) { S.teardown(ctx.el); return; }
+      runRetype(ctx, host, from, into, ctx.num('speed', 42), () => S.teardown(ctx.el));
     },
   });
 
@@ -244,14 +280,40 @@
     },
   });
 
-  // ── .resize-in ────────────────────────────────────────────────────────────
-  // Arrives at the wrong size; a cursor drags the corner handle to fix it.
+  // ── .resize ───────────────────────────────────────────────────────────────
+  // Already on the slide at the wrong size; a cursor drags the corner handle
+  // to fix it. Nothing arrives from offscreen, so it is not a "-in" style.
+  //
+  // The shrink to `from-width` has to happen before the fragment ever fires,
+  // or the pre-fire CSS override (which keeps it visible) shows it at its
+  // full declared size, and firing the fragment then has to snap it down to
+  // `from-width` before the drag can grow it back — a visible jump. So every
+  // `.resize` image is pre-shrunk once, right after the page loads, using its
+  // declared `width` attribute rather than `offsetWidth`: at that point most
+  // slides are still `display: none` (Reveal only lays out the current one),
+  // so a live measurement would read 0.
+  function initResizeImages() {
+    document.querySelectorAll('.resize').forEach((el) => {
+      if (el.dataset.fxFinalW) return;
+      const declared = parseInt(el.getAttribute('width'), 10);
+      const finalW = declared || el.offsetWidth;
+      if (!finalW) return;
+      const startW = S.num(el, 'from-width', Math.round(finalW * 0.55));
+      el.dataset.fxFinalW = finalW;
+      el.style.width = startW + 'px';
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initResizeImages);
+  } else {
+    initResizeImages();
+  }
 
-  S.define('resize-in', {
+  S.define('resize', {
     show(ctx) {
       const el = ctx.el;
       const section = ctx.section;
-      const finalW = el.offsetWidth;              // measure before touching it
+      const finalW = Number(el.dataset.fxFinalW) || el.offsetWidth;
       const startW = ctx.num('from-width', Math.round(finalW * 0.55));
       el.style.width = startW + 'px';
 
@@ -278,11 +340,11 @@
     },
   });
 
-  // ── .crop-in ──────────────────────────────────────────────────────────────
+  // ── .crop ─────────────────────────────────────────────────────────────────
   // A cursor drags a crop edge inward. clip-path cannot be tweened directly,
   // so the inset percentages are animated on a plain object and applied.
 
-  S.define('crop-in', {
+  S.define('crop', {
     show(ctx) {
       const el = ctx.el;
       const target = (ctx.attr('inset') || '0 22 0 0')
@@ -377,7 +439,6 @@
       // Clone the last entry so the new one inherits its markup and styling,
       // then empty it: measuring it full gives the height the slot opens to.
       const row = last ? last.cloneNode(false) : document.createElement('li');
-      ctx.marker._fxRow = row;
       row.textContent = text;
       list.appendChild(row);
       const open = row.offsetHeight + 'px';
@@ -410,15 +471,6 @@
                begin: () => { row.style.height = ''; row.style.overflow = ''; } }, t);
 
       S.flyOut(tl, cursor, entry, t + 240);
-    },
-
-    // Undo just the row: the list this fragment appended to may be the way a
-    // different fragment left it, and a full restore would revert that too.
-    hide(ctx) {
-      S.sweep(ctx.el);
-      const row = ctx.marker._fxRow;
-      if (row) row.remove();
-      ctx.marker._fxRow = null;
     },
   });
 
@@ -561,7 +613,9 @@
       if (!items[fromI] || !items[toI] || fromI === toI) return;
 
       const moving = items[fromI];
-      const h = items.map(i => i.offsetHeight);
+      // offsetHeight alone omits the gap list items sit in (margin-bottom),
+      // so a moved item would land short and overlap its new neighbor.
+      const h = items.map(i => i.offsetHeight + (parseFloat(getComputedStyle(i).marginBottom) || 0));
 
       let dist = 0;
       const others = [];
@@ -580,12 +634,18 @@
       const entry = S.flyIn(tl, cursor, ctx.from(), grab, 0);
       let t = S.squeeze(tl, moving, 580);
 
+      // Lifted above the others for the length of the travel, so it reads as
+      // one row passing over another rather than raw overlapping text.
+      tl.add({ targets: moving, opacity: [1, 1], duration: 1, easing: 'linear',
+               begin: () => moving.classList.add('fx-reorder-lifted') }, t);
       tl.add({ targets: moving, translateY: dist, duration: 700,
                easing: 'easeInOutQuad' }, t);
       tl.add({ targets: cursor, translateY: grab.y + dist, duration: 700,
                easing: 'easeInOutQuad' }, t);
       tl.add({ targets: others, translateY: shift, duration: 700,
                easing: 'easeInOutQuad', delay: anime.stagger(40) }, t);
+      tl.add({ targets: moving, opacity: [1, 1], duration: 1, easing: 'linear',
+               begin: () => moving.classList.remove('fx-reorder-lifted') }, t + 760);
 
       S.flyOut(tl, cursor, entry, t + 820);
     },
@@ -611,7 +671,15 @@
 
       for (let i = 1; i <= times; i++) {
         const clone = ctx.chrome('clone-' + i, 'fx-clone');
-        clone.innerHTML = el.innerHTML;
+        // `el.innerHTML` is empty when `el` is the image itself rather than a
+        // wrapper around one (e.g. `.fragment .duplicate` on an `<img>`
+        // directly), so clone the element's own markup instead. The clone
+        // carries over the `fragment` class from `el`'s outerHTML, which
+        // Reveal would otherwise hide forever (it never marks an untracked
+        // clone `.visible`), so that class is stripped once copied in.
+        clone.innerHTML = el.outerHTML;
+        const inner = clone.firstElementChild;
+        if (inner) inner.className = '';
         S.placeAt(clone, c.x, c.y);
         clone.style.width = c.w + 'px';
         clone.style.height = '';
@@ -640,34 +708,129 @@
   S.define('diff-in', {
     show(ctx) {
       const el = ctx.el;
-      const was = ctx.attr('was');
-      if (!was) return;
+      const to = ctx.attr('to');
+      if (!to) return;
 
-      const text = el._fxText || el.textContent.trim();
+      // Matches .retype's interface: el's own text is the starting ("was")
+      // value, shown as-is before the fragment fires; `to` is what it becomes.
+      const was = el._fxText || el.textContent.trim();
+      el.dataset.fxWas = was;
+      el.dataset.fxTo = to;
       const del = document.createElement('span');
       del.className = 'fx-del';
       del.textContent = was;
+      const strike = document.createElement('span');
+      strike.className = 'fx-strike';
+      del.appendChild(strike);
       const ins = document.createElement('span');
       ins.className = 'fx-ins';
-      ins.textContent = text;
+      ins.textContent = to;
 
+      const sep = document.createTextNode(' ');
       el.innerHTML = '';
       el.appendChild(del);
-      el.appendChild(document.createTextNode(' '));
+      el.appendChild(sep);
       el.appendChild(ins);
 
       anime.set(del, { opacity: 0 });
-      anime.set(ins, { opacity: 0 });
+      anime.set(strike, { scaleX: 0 });
+      anime.set(ins, { opacity: 0, translateY: 8 });
 
       const tl = ctx.tl();
-      tl.add({ targets: del, opacity: 1, duration: 260, easing: 'easeOutQuad' }, 0);
-      tl.add({ targets: ins, opacity: 1, duration: 320, easing: 'easeOutQuad' }, 520);
-      tl.add({ targets: del, opacity: 0, duration: 320, easing: 'easeInQuad' }, 1180);
-      tl.add({ targets: ins, opacity: 1, duration: 260, easing: 'linear',
+      // del fades in, then the strike line draws across it left to right
+      tl.add({ targets: del, opacity: 1, duration: 220, easing: 'easeOutQuad' }, 0);
+      tl.add({ targets: strike, scaleX: 1, duration: 380, easing: 'easeInOutQuad' }, 260);
+      // ins appears right next to del while del is still on screen, struck through
+      tl.add({ targets: ins, opacity: 1, translateY: 0, duration: 360, easing: 'easeOutQuad' }, 700);
+      // del fades away and is removed; capture the gap it leaves so ins can
+      // visibly slide into the space rather than snapping to its new layout position.
+      // This has to be a fresh anime() instance rather than a tl.add() queued up
+      // front: a timeline tween resolves its start value at build time, long before
+      // the gap left by del is known, so a pre-added translateX tween would just
+      // animate 0 -> 0 and the anime.set() jump would look like a snap.
+      tl.add({ targets: del, opacity: 0, duration: 320, easing: 'easeInQuad',
                complete: () => {
-                 if (del.isConnected) del.remove();
-                 ins.className = 'fx-ins fx-ins--settled';
-               } }, 1520);
+                 if (!del.isConnected) { settle(); return; }
+                 const before = ins.getBoundingClientRect();
+                 del.remove();
+                 sep.remove();
+                 const after = ins.getBoundingClientRect();
+                 const dx = before.left - after.left;
+                 if (!dx) { settle(); return; }
+                 // A plain CSS transition rather than a JS-driven anime tween: the
+                 // browser can run this on the compositor, which reads smoother
+                 // than a per-frame anime tick for a single transform property.
+                 // The jump to translateX(dx) and the transition-start both need
+                 // to land in the DOM before the next paint but after a forced
+                 // reflow, or the browser coalesces them and nothing animates —
+                 // hence set + reflow + rAF before flipping to the end value.
+                 ins.style.transition = 'none';
+                 ins.style.transform = `translateX(${dx}px)`;
+                 void ins.offsetWidth;
+                 requestAnimationFrame(() => {
+                   ins.style.transition = 'transform 420ms cubic-bezier(.45,0,.2,1)';
+                   ins.style.transform = 'translateX(0px)';
+                 });
+                 ins.addEventListener('transitionend', function onEnd(e) {
+                   if (e.propertyName !== 'transform') return;
+                   ins.removeEventListener('transitionend', onEnd);
+                   ins.style.transition = '';
+                   settle();
+                 });
+               } }, 1300);
+
+      function settle() {
+        setTimeout(() => { ins.className = 'fx-ins fx-ins--settled'; }, 300);
+      }
+    },
+    // The forward run ends with a lot of manual DOM surgery (del and its
+    // separating space removed, ins's position corrected via a raw CSS
+    // transition) that a generic `tl.reverse()` has no way to undo, so this
+    // rebuilds del from scratch and plays the same beats back to front.
+    hide(ctx) {
+      const el = ctx.el;
+      const was = el.dataset.fxWas;
+      const to = el.dataset.fxTo;
+      const ins = el.querySelector('.fx-ins');
+      if (was == null || to == null || !ins) { S.teardown(el); return; }
+
+      const del = document.createElement('span');
+      del.className = 'fx-del';
+      del.textContent = was;
+      const strike = document.createElement('span');
+      strike.className = 'fx-strike';
+      del.appendChild(strike);
+      const sep = document.createTextNode(' ');
+
+      anime.set(del, { opacity: 0 });
+      anime.set(strike, { scaleX: 1 });
+
+      // Reinsert del + sep ahead of ins, then compensate for the reflow the
+      // same way the forward run does, so ins doesn't jump before the slide
+      // carries it back into place next to the reborn del.
+      const before = ins.getBoundingClientRect();
+      el.insertBefore(sep, ins);
+      el.insertBefore(del, sep);
+      const after = ins.getBoundingClientRect();
+      const dx = before.left - after.left;
+      ins.style.transition = 'none';
+      ins.style.transform = dx ? `translateX(${dx}px)` : '';
+      void ins.offsetWidth;
+
+      // undo the color settle first, mirroring the forward run's last step
+      ins.classList.remove('fx-ins--settled');
+
+      requestAnimationFrame(() => {
+        ins.style.transition = 'transform 420ms cubic-bezier(.45,0,.2,1)';
+        ins.style.transform = 'translateX(0px)';
+      });
+
+      const tl = ctx.tl();
+      tl.add({ targets: del, opacity: 1, duration: 320, easing: 'easeOutQuad' }, 300);
+      tl.add({ targets: ins, opacity: 0, duration: 360, easing: 'easeInQuad' }, 780);
+      tl.add({ targets: strike, scaleX: 0, duration: 380, easing: 'easeInOutQuad' }, 1160);
+      tl.add({ targets: del, opacity: 0, duration: 220, easing: 'easeInQuad',
+               complete: () => S.teardown(el) }, 1560);
     },
   });
 
@@ -711,9 +874,33 @@
 
   // ── .comment ──────────────────────────────────────────────────────────────
 
+  // Anchors to the last word of `root`'s text, so the arrow points at what was
+  // actually said rather than the whole block. Falls back to `root` itself
+  // when there is no plain text to grab (e.g. an image-only element).
+  function lastWordSpan(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    let last = null;
+    while ((node = walker.nextNode())) {
+      if (node.data.trim()) last = node;
+    }
+    if (!last) return root;
+
+    const m = /\S+\s*$/.exec(last.data);
+    if (!m) return root;
+
+    const start = last.splitText(m.index);
+    const span = document.createElement('span');
+    span.className = 'fx-comment-anchor';
+    span.textContent = start.data;
+    start.replaceWith(span);
+    return span;
+  }
+
   S.define('comment', {
     show(ctx) {
-      const c = ctx.box();
+      const anchor = lastWordSpan(ctx.el);
+      const c = S.posIn(anchor, ctx.section);
       // No `cursor` name means an anonymous comment: bare arrow, and the
       // bubble drops its author line rather than inventing a collaborator.
       const author = ctx.attr('cursor');

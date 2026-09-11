@@ -57,13 +57,24 @@
   visibility: visible !important;
 }
 
+/* Generic counterpart used by `reverseThenTeardown`: applied only while a
+   style's reverse animation is actually playing, so styles that must start
+   hidden pre-fire (unlike .retype/.diff-in/... above, which show their
+   "before" text right away) aren't forced visible before the fragment has
+   ever run. */
+.reveal .slides section .fx-leaving {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* These styles act on content that should already be sitting on the slide;
    only the edit itself (retype, nudge, approve mark, ...) is the fragment
    step. Reveal hides fragments by default via `.fragment:not(.custom){opacity:0;
    visibility:hidden}` (reveal.css); both properties need overriding, or the
    element stays invisible until the fragment step even with opacity forced. */
 .reveal .slides section :is(
-  .retype, .nudge, .approve, .delete-items, .add-item, .undo, .comment, .argue
+  .retype, .nudge, .approve, .delete-items, .add-item, .undo, .comment, .argue,
+  .diff-in, .marquee-select, .reorder, .resize, .crop, .duplicate
 ) {
   opacity: 1 !important;
   visibility: visible !important;
@@ -220,7 +231,7 @@
    default fragment transition is `all`, which fights it. */
 .reveal .slides section :is(
   .retype, .nudge, .paste-in, .approve, .cursor-idle,
-  .race-in, .resize-in, .crop-in, .rotate-handle, .marquee-select, .reorder,
+  .race-in, .resize, .crop, .rotate-handle, .marquee-select, .reorder,
   .duplicate, .diff-in, .undo, .comment, .argue, .drag-from-folder
 ) {
   transition: none;
@@ -242,6 +253,17 @@
 .reveal .slides section:has(.race-in),
 .reveal .slides section:has(.drag-from-folder) {
   overflow: visible;
+}
+
+/* .reorder's moving item, while it travels over the others: without this it
+   is just raw overlapping text mid-flight, which reads as broken rather than
+   as one row passing over another. */
+.fx-reorder-lifted {
+  position: relative;
+  z-index: 5;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
 }
 
 /* Selection highlights */
@@ -278,7 +300,7 @@
   outline: 1.5px solid rgba(66, 133, 244, 0.9);
 }
 
-.fx-handles::before, .fx-handles::after {
+.fx-handles::before {
   content: '';
   position: absolute;
   width: 9px;
@@ -286,9 +308,9 @@
   background: #fff;
   border: 1.5px solid #4285f4;
   border-radius: 1px;
+  right: -5px;
+  bottom: -5px;
 }
-.fx-handles::before { right: -5px; bottom: -5px; }
-.fx-handles::after  { left: -5px; top: -5px; }
 
 .fx-crop-frame {
   position: absolute;
@@ -369,21 +391,47 @@
   pointer-events: none;
 }
 
+/* The clone wrapper is sized in JS; its cloned image (or other content)
+   needs to fill that box rather than keep its own natural/attribute size. */
+.fx-clone img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Diff */
 
 .fx-del {
+  position: relative;
+  display: inline-block;
   color: #c62828;
   background: rgba(198, 40, 40, 0.12);
-  text-decoration: line-through;
   border-radius: 2px;
   padding: 0 2px;
+  will-change: transform;
+}
+
+.fx-strike {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: #c62828;
+  transform-origin: left center;
+  transform: scaleX(0);
+  pointer-events: none;
 }
 
 .fx-ins {
+  display: inline-block;
   color: #2e7d32;
   background: rgba(46, 125, 50, 0.14);
   border-radius: 2px;
   padding: 0 2px;
+  will-change: transform;
+  transition: color 0.6s ease, background-color 0.6s ease;
 }
 
 .fx-ins--settled {
