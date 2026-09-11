@@ -1,5 +1,5 @@
 ---
-title: Cursor Fragments gallery
+title: quarto-revealjs-cursor-fragments
 format:
   revealjs:
     width: 1280
@@ -7,11 +7,57 @@ format:
     revealjs-plugins:
       - cursor-fragments
     auto-stretch: false
-pagetitle: Cursor Fragments gallery
+pagetitle: quarto-revealjs-cursor-fragments
 echo: false
 code-line-numbers: false
 slide-level: 2
 ---
+
+# Getting started
+
+## Install
+
+```bash
+quarto add EmilHvitfeldt/quarto-revealjs-cursor-fragments
+```
+
+```yaml
+format:
+  revealjs:
+    revealjs-plugins:
+      - cursor-fragments
+```
+
+## Use a style
+
+Mark a fragment with a style's class, e.g. `.retype` or `.nudge`, plus the attributes it takes (listed per style below, and in the README).
+
+Attributes need no `data-` prefix: `cursor="Dave"` works as-is.
+
+## Acting at a distance
+
+Some styles take `for="#selector"` and act on a different, already-visible element, leaving the fragment itself empty as a bare trigger.
+
+See `move-item` later in this deck for an example.
+
+## Span or div?
+
+A style goes on whichever kind of element it needs to grab onto:
+
+- **span** — a run of text inside a sentence, e.g. `retype`, `approve`
+- **div** — a box to measure, resize, or hold list children, e.g. `nudge`, `race-in`, images
+
+## Span or div? (cont.)
+
+A span has no independent width or height, so block-shaped effects (resize, drag, list edits) want the box a fenced div provides. Text-level effects want a plain inline span.
+
+Using the "wrong" one usually still runs, since the effect targets whatever node it is handed, but sizing looks off.
+
+## This gallery is the live site
+
+A GitHub Actions workflow renders this file on every push to `main` and publishes it to `gh-pages`, which GitHub Pages serves.
+
+Edit `gallery.qmd`, push to `main`, and the published gallery updates.
 
 # Text edits
 
