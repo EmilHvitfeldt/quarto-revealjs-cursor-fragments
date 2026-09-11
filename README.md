@@ -1,4 +1,4 @@
-# SlideFx
+# Cursor Fragments
 
 Cursor-driven RevealJS fragment animations for Quarto. Mark a fragment with a class like `.nudge` or `.drag-from-folder`, add a few attributes, and it animates as if a named collaborator's cursor were doing the edit live.
 
@@ -14,7 +14,7 @@ Then in a revealjs document's YAML:
 format:
   revealjs:
     revealjs-plugins:
-      - slidefx
+      - cursor-fragments
 ```
 
 See `gallery.qmd` for a full demo of every style, or preview it with:
@@ -25,7 +25,7 @@ quarto preview gallery.qmd
 
 ## Styles
 
-Every style is a `.fragment` with a marker class. Attributes need no `data-` prefix; Quarto rewrites them and SlideFx reads either spelling. `cursor="Name"` labels the cursor; omit it for a bare, anonymous arrow. `for="#selector"` lets an empty fragment act on content already on screen.
+Every style is a `.fragment` with a marker class. Attributes need no `data-` prefix; Quarto rewrites them and CursorFragments reads either spelling. `cursor="Name"` labels the cursor; omit it for a bare, anonymous arrow. `for="#selector"` lets an empty fragment act on content already on screen.
 
 - **retype** — `for`, `word`, `to`, `cursor`, `speed`: selects a word, deletes it, types the replacement.
 - **nudge** — `for`, `by="x,y"`, `cursor`: shifts an element, then partway back.

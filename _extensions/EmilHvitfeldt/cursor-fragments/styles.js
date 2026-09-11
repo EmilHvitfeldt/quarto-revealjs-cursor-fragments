@@ -1,6 +1,6 @@
-// Fragment styles built on SlideFx. Each one is registered with
-// SlideFx.define(class, { show(ctx) }), and gets caching, restore-on-hide and
-// timeline cancellation from the registry for free.
+// Fragment styles built on CursorFragments. Each one is registered with
+// CursorFragments.define(class, { show(ctx) }), and gets caching, restore-on-hide
+// and timeline cancellation from the registry for free.
 //
 // Styles that act on content already on screen accept `for="#selector"`, so the
 // fragment carrying the class can be an empty trigger:
@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  const S = window.SlideFx;
+  const S = window.CursorFragments;
 
   // Haul an element in from an offscreen edge, cursor in tow. Shared by
   // .race-in and .drag-from-folder; the standalone .drag-in style in

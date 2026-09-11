@@ -1,12 +1,12 @@
 ---
-title: SlideFx gallery
+title: Cursor Fragments gallery
 format:
   revealjs:
     width: 1280
     height: 720
     revealjs-plugins:
-      - slidefx
-pagetitle: SlideFx gallery
+      - cursor-fragments
+pagetitle: Cursor Fragments gallery
 echo: false
 code-line-numbers: false
 ---

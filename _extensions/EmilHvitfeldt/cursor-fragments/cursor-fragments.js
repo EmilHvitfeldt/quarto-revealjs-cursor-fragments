@@ -1,4 +1,4 @@
-// SlideFx — a small library of cursor-driven RevealJS fragment styles.
+// CursorFragments — a small library of cursor-driven RevealJS fragment styles.
 //
 // Every style here follows the same contract, which the registry enforces so
 // each individual style does not have to:
@@ -17,7 +17,7 @@
 // Attributes need no data- prefix in the .qmd; Quarto rewrites them to data-*
 // and `attr()` reads either spelling.
 
-window.SlideFx = (function () {
+window.CursorFragments = (function () {
   'use strict';
 
   const SLIDE_W = 1280;
@@ -499,7 +499,7 @@ window.SlideFx = (function () {
   return {
     // boot() wires itself up via Reveal.on regardless of plugin registration;
     // id/init are here only so RevealJS accepts this as a well-formed plugin.
-    id: 'SlideFx',
+    id: 'CursorFragments',
     init() {},
     SLIDE_W, SLIDE_H,
     attr, num, pair, list,
