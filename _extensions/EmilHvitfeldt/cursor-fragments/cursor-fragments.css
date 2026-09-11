@@ -1,3 +1,31 @@
+/*-- collaborator cursors (injected by JS) --*/
+
+.collab-cursor-node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 900;
+  display: flex;
+  align-items: flex-start;
+}
+
+.collab-cursor-arrow {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+  flex-shrink: 0;
+}
+
+.collab-cursor-name {
+  color: #fff;
+  font: 700 11px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 3px 8px;
+  border-radius: 0 4px 4px 4px;
+  margin-top: 16px;
+  margin-left: 1px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
 /*-- drag-in fragments --*/
 
 /* Must not clip content while it is still off-slide. Do NOT set
@@ -25,6 +53,18 @@
 /* Held on screen by JS for the length of the drag-out, after Reveal has
    already removed the `visible` class. */
 .reveal .slides section .drag-leaving {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* These styles act on content that should already be sitting on the slide;
+   only the edit itself (retype, nudge, approve mark, ...) is the fragment
+   step. Reveal hides fragments by default via `.fragment:not(.custom){opacity:0;
+   visibility:hidden}` (reveal.css); both properties need overriding, or the
+   element stays invisible until the fragment step even with opacity forced. */
+.reveal .slides section :is(
+  .retype, .nudge, .approve, .delete-items, .add-item, .undo, .comment, .argue
+) {
   opacity: 1 !important;
   visibility: visible !important;
 }
