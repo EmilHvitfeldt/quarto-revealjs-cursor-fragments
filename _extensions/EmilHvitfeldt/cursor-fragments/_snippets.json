@@ -1,0 +1,167 @@
+{
+  "Cursor Fragments: retype": {
+    "prefix": "cursor-fragments:retype",
+    "body": [
+      "[${1:word}]{.fragment .retype to=\"${2:replacement}\" cursor=\"${3:Name}\"}"
+    ],
+    "description": "Select a word, delete it, type the replacement."
+  },
+  "Cursor Fragments: nudge": {
+    "prefix": "cursor-fragments:nudge",
+    "body": [
+      "::: {.fragment .nudge by=\"${1:26,0}\" cursor=\"${2:Name}\"}",
+      "${3:content}",
+      ":::"
+    ],
+    "description": "Shift an element, then partway back."
+  },
+  "Cursor Fragments: approve": {
+    "prefix": "cursor-fragments:approve",
+    "body": [
+      "[${1:text}]{.fragment .approve mark=\"${2:✓}\" cursor=\"${3:Name}\"}"
+    ],
+    "description": "Land a checkmark badge beside the target."
+  },
+  "Cursor Fragments: diff-in": {
+    "prefix": "cursor-fragments:diff-in",
+    "body": [
+      "::: {.fragment .diff-in to=\"${1:new text}\"}",
+      "${2:old text}",
+      ":::"
+    ],
+    "description": "Strike through old text, settle in new text."
+  },
+  "Cursor Fragments: undo": {
+    "prefix": "cursor-fragments:undo",
+    "body": [
+      "::: {.fragment .undo by=\"${1:110,30}\" cursor=\"${2:Name}\"}",
+      "${3:content}",
+      ":::"
+    ],
+    "description": "Make a change, then undo it with a shortcut badge."
+  },
+  "Cursor Fragments: comment": {
+    "prefix": "cursor-fragments:comment",
+    "body": [
+      "::: {.fragment .comment cursor=\"${1:Name}\" text=\"${2:comment text}\"}",
+      "${3:content}",
+      ":::"
+    ],
+    "description": "Drop a comment bubble in beside the target."
+  },
+  "Cursor Fragments: argue": {
+    "prefix": "cursor-fragments:argue",
+    "body": [
+      "[${1:text}]{.fragment .argue cursors=\"${2:A,B}\" winner=\"${3:right}\" amp=\"${4:60}\"}"
+    ],
+    "description": "Two cursors drag an element back and forth; one wins."
+  },
+  "Cursor Fragments: race-in": {
+    "prefix": "cursor-fragments:race-in",
+    "body": [
+      "::: {.fragment .race-in cursors=\"${1:A,B,C,D}\"}",
+      "- ${2:first point}",
+      "- ${3:second point}",
+      ":::"
+    ],
+    "description": "Every list line arrives from a different edge at once."
+  },
+  "Cursor Fragments: marquee-select": {
+    "prefix": "cursor-fragments:marquee-select",
+    "body": [
+      "::: {.fragment .marquee-select by=\"${1:80,0}\" cursor=\"${2:Name}\"}",
+      "- ${3:alpha}",
+      "- ${4:beta}",
+      ":::"
+    ],
+    "description": "A marquee selects list items, then drags them."
+  },
+  "Cursor Fragments: delete-items": {
+    "prefix": "cursor-fragments:delete-items",
+    "body": [
+      "::: {.fragment .delete-items keep=\"${1:1}\" cursor=\"${2:Name}\"}",
+      "- ${3:keep this one}",
+      "- ${4:but not this}",
+      ":::"
+    ],
+    "description": "Sweep doomed list rows away and close the list up."
+  },
+  "Cursor Fragments: add-item": {
+    "prefix": "cursor-fragments:add-item",
+    "body": [
+      "::: {.fragment .add-item text=\"${1:new item text}\" cursor=\"${2:Name}\"}",
+      "- ${3:first}",
+      "- ${4:second}",
+      ":::"
+    ],
+    "description": "Open a new list row and type it in."
+  },
+  "Cursor Fragments: reorder": {
+    "prefix": "cursor-fragments:reorder",
+    "body": [
+      "::: {.fragment .reorder item=\"${1:3}\" to=\"${2:1}\" cursor=\"${3:Name}\"}",
+      "- ${4:first}",
+      "- ${5:second}",
+      ":::"
+    ],
+    "description": "Drag one list item to a new position."
+  },
+  "Cursor Fragments: move-item": {
+    "prefix": "cursor-fragments:move-item",
+    "body": [
+      "::: {.fragment .move-item for=\"${1:#source-list}\" to=\"${2:#destination-list}\" item=\"${3:2}\" cursor=\"${4:Name}\"}",
+      ":::"
+    ],
+    "description": "Carry an item from one list to another."
+  },
+  "Cursor Fragments: paste-in": {
+    "prefix": "cursor-fragments:paste-in",
+    "body": [
+      "![](${1:image.png}){width=\"${2:300}\" .fragment .paste-in badge=\"${3:⌘V}\"}"
+    ],
+    "description": "Pop a shortcut badge and reveal the content."
+  },
+  "Cursor Fragments: resize": {
+    "prefix": "cursor-fragments:resize",
+    "body": [
+      "![](${1:image.png}){width=\"${2:360}\" .fragment .resize from-width=\"${3:180}\" cursor=\"${4:Name}\"}"
+    ],
+    "description": "Drag a corner handle to resize an image."
+  },
+  "Cursor Fragments: crop": {
+    "prefix": "cursor-fragments:crop",
+    "body": [
+      "![](${1:image.png}){width=\"${2:360}\" .fragment .crop inset=\"${3:0 26 0 0}\" cursor=\"${4:Name}\"}"
+    ],
+    "description": "Drag a crop frame edge inward."
+  },
+  "Cursor Fragments: rotate-handle": {
+    "prefix": "cursor-fragments:rotate-handle",
+    "body": [
+      "![](${1:image.png}){width=\"${2:260}\" .fragment .rotate-handle angle=\"${3:-8}\" cursor=\"${4:Name}\"}"
+    ],
+    "description": "Orbit a handle around the element as it rotates."
+  },
+  "Cursor Fragments: duplicate": {
+    "prefix": "cursor-fragments:duplicate",
+    "body": [
+      "![](${1:image.png}){width=\"${2:220}\" .fragment .duplicate times=\"${3:3}\" gap=\"${4:18}\" cursor=\"${5:Name}\"}"
+    ],
+    "description": "Option-drag an element into a grid of copies."
+  },
+  "Cursor Fragments: drag-from-folder": {
+    "prefix": "cursor-fragments:drag-from-folder",
+    "body": [
+      "![](${1:image.png}){width=\"${2:300}\" .fragment .drag-from-folder files=\"${3:a.png,b.png,c.png}\" pick=\"${4:2}\" folder=\"${5:images}\"}"
+    ],
+    "description": "Open a folder window and drag a thumbnail onto the slide."
+  },
+  "Cursor Fragments: cursor-idle": {
+    "prefix": "cursor-fragments:cursor-idle",
+    "body": [
+      "::: {.fragment .cursor-idle cursors=\"${1:A,B,C}\"}",
+      ":::"
+    ],
+    "description": "Ambient idle cursors with no edit performed."
+  }
+}

@@ -1,0 +1,183 @@
+$schema: "https://raw.githubusercontent.com/mcanouil/quarto-wizard/main/schemas/quarto-extension-schema.json"
+
+classes:
+  - name: retype
+    description: Selects a word, deletes it, types the replacement.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: word
+        description: The word to select before retyping.
+      - name: to
+        description: Replacement text to type in.
+      - name: cursor
+        description: Name of the cursor performing the edit.
+      - name: speed
+        description: Typing speed.
+  - name: nudge
+    description: Shifts an element, then partway back.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: by
+        description: "Offset as \"x,y\" to shift the element by."
+      - name: cursor
+        description: Name of the cursor performing the edit.
+  - name: approve
+    description: A checkmark badge lands beside the target.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: mark
+        description: Badge symbol to display, e.g. a checkmark.
+      - name: cursor
+        description: Name of the cursor performing the edit.
+  - name: diff-in
+    description: Old text struck through, new text settles in.
+    attributes:
+      - name: to
+        description: Replacement text shown after the diff animation.
+  - name: undo
+    description: A change is made, then undone with a shortcut badge.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: by
+        description: "Offset as \"x,y\" for the change that gets undone."
+      - name: tilt
+        description: Rotation applied during the change.
+      - name: cursor
+        description: Name of the cursor performing the edit.
+  - name: comment
+    description: A comment bubble drops in beside the target.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: text
+        description: Comment text shown in the bubble.
+      - name: cursor
+        description: Name of the cursor leaving the comment. Omit for an anonymous note.
+  - name: argue
+    description: Two cursors drag an element back and forth; one wins.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: cursors
+        description: Comma-separated pair of cursor names, e.g. "A,B". Omit for anonymous cursors.
+      - name: winner
+        description: Which side wins the tug-of-war.
+      - name: amp
+        description: Amplitude of the back-and-forth motion.
+  - name: race-in
+    description: Every list line arrives from a different edge at once.
+    attributes:
+      - name: cursors
+        description: Comma-separated cursor names, one per list line.
+      - name: stagger
+        description: Delay between each line's arrival.
+      - name: duration
+        description: Duration of each line's arrival animation.
+  - name: marquee-select
+    description: A marquee selects list items, then drags them.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: by
+        description: "Offset as \"x,y\" to drag the selection by."
+      - name: cursor
+        description: Name of the cursor performing the selection.
+  - name: delete-items
+    description: A selection sweeps doomed list rows away and the list closes up.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: keep
+        description: Index of the item to keep (alternative to items).
+      - name: items
+        description: Indices of the items to keep (alternative to keep).
+      - name: cursor
+        description: Name of the cursor performing the deletion.
+  - name: add-item
+    description: A new list row opens and types itself in.
+    attributes:
+      - name: for
+        description: Selector of an element to act on instead of the fragment itself.
+      - name: text
+        description: Text typed into the new list row.
+      - name: cursor
+        description: Name of the cursor typing the new row.
+      - name: speed
+        description: Typing speed.
+  - name: reorder
+    description: One list item is dragged to a new position; others shift to make room.
+    attributes:
+      - name: item
+        description: Index of the item being moved.
+      - name: to
+        description: Destination index for the item.
+      - name: cursor
+        description: Name of the cursor performing the move.
+  - name: move-item
+    description: An item is carried from one list to another, optionally reworded on arrival; stepping back reverses the carry.
+    attributes:
+      - name: for
+        description: Selector of the source list.
+      - name: to
+        description: Selector of the destination list.
+      - name: item
+        description: Index of the item being moved.
+      - name: text
+        description: Optional replacement text applied on arrival.
+      - name: cursor
+        description: Name of the cursor performing the move.
+  - name: paste-in
+    description: A shortcut badge pops and the content appears.
+    attributes:
+      - name: badge
+        description: Shortcut badge text, e.g. a paste keyboard shortcut.
+  - name: resize
+    description: A corner-handle drag resizes an image up to its full size.
+    attributes:
+      - name: from-width
+        description: Starting width the image is resized from.
+      - name: cursor
+        description: Name of the cursor performing the resize.
+  - name: crop
+    description: A crop frame drags an edge inward.
+    attributes:
+      - name: inset
+        description: "Crop inset as \"top right bottom left\"."
+      - name: cursor
+        description: Name of the cursor performing the crop.
+  - name: rotate-handle
+    description: A handle orbits the element as it rotates.
+    attributes:
+      - name: angle
+        description: Rotation angle in degrees.
+      - name: cursor
+        description: Name of the cursor performing the rotation.
+  - name: duplicate
+    description: An element is option-dragged into a grid of copies.
+    attributes:
+      - name: times
+        description: Number of copies to create.
+      - name: gap
+        description: Gap between the copies.
+      - name: cursor
+        description: Name of the cursor performing the duplication.
+  - name: drag-from-folder
+    description: A folder window opens and a thumbnail is dragged out onto the slide.
+    attributes:
+      - name: files
+        description: Comma-separated filenames shown in the folder window.
+      - name: pick
+        description: Index of the file that gets dragged out.
+      - name: folder
+        description: Name of the folder window.
+      - name: src
+        description: Source path of the dragged-in content, if different from the element's own source.
+  - name: cursor-idle
+    description: Ambient idle cursors that make the slide feel inhabited, with no edit performed.
+    attributes:
+      - name: cursors
+        description: Comma-separated cursor names to show idling on the slide.
